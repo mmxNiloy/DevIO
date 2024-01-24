@@ -1,5 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:devio/dashboard/dashboard.dart';
+import 'package:devio/models/user_model.dart';
 import 'package:devio/signup_page/signup_page.dart';
+import 'package:devio/signup_success_page/signup_success_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -72,7 +75,7 @@ class _LandingPageState extends State<LandingPage> {
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 4),
                                 child: Container(
-                                  color: Colors.blue,
+                                  color: Theme.of(context).dividerColor,
                                   height: 2,
                                 ),
                               ),
@@ -146,7 +149,8 @@ class _LandingPageState extends State<LandingPage> {
                           onPressed: handleSignupButton,
                           child: const Text('Sign up'),
                         ),
-                      )
+                      ),
+                      // OutlinedButton(onPressed: (){Navigator.push(context, MaterialPageRoute(builder: (context) => SignupSuccessPage(model: UserModel(firstName: 'Niloy', lastName: 'Sarkar', uid: '', username: '', gender: ''),))); }, child: Text('Test Signup success page'))
                     ],
                   ),
                 ),
@@ -159,33 +163,38 @@ class _LandingPageState extends State<LandingPage> {
 
   Future<void> handleLogin() async {
     // Sample login
-    UserCredential uc = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim()
-    );
+    try {
+      UserCredential uc = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim()
+      );
 
-    if(uc.user != null) {
-      debugPrint('Firebase auth > ${uc.user?.uid}');
-      final dbRef = FirebaseFirestore.instance;
-      final collRef = dbRef.collection('users');
-
-      String? uid = uc.user?.uid;
-      final docRef = collRef.doc(uid!);
-      final doc = await docRef.get();
-      if(doc.exists) {
-        await docRef.update({
-          'login_count': int.parse(doc.data()!['login_count'].toString()) + 1
-        });
-      } else {
-        await docRef.set({
-          'login_count': 1
-        });
+      if(mounted) {
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const Dashboard())
+        );
       }
-      debugPrint('Updated database.');
-
-      FirebaseAuth.instance.signOut();
-    } else {
-      debugPrint('Firebase auth > Login failed. Invalid credentials.');
+    } on FirebaseAuthException catch (err) {
+      debugPrint('Firebase auth error > ${err.code}');
+      switch(err.code) {
+        case 'invalid-credential':
+          ScaffoldMessenger.of(context)
+              .showSnackBar(
+              const SnackBar(
+                  content: Text('Invalid credentials. Given email or password is wrong!')
+              )
+          );
+          break;
+        default:
+          ScaffoldMessenger.of(context)
+              .showSnackBar(
+              const SnackBar(
+                  content: Text('Something went wrong during sing-in.')
+              )
+          );
+          break;
+      }
     }
   }
 
