@@ -453,6 +453,8 @@ class _SignupPageState extends State<SignupPage> {
       debugPrint('Sign up page > handleSingup() > Failed to update firestore database entries.');
     }
 
+    
+
     // User created
     // Notify the user
     setState(() {

@@ -21,7 +21,14 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   int _navbarIndex = 0;
   final PageController _pageController = PageController(initialPage: 0);
-  UserModel? _mUser;
+
+  Stream<DocumentSnapshot<Map<String, dynamic>>> userInfoStream() {
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    return FirebaseFirestore.instance
+        .collection(UsersCollection.collectionName)
+        .doc(uid)
+        .snapshots();
+  }
 
   final List<NavigationDestination> _bottomNavItems = [
     const NavigationDestination(
@@ -56,15 +63,39 @@ class _DashboardState extends State<Dashboard> {
         appBar: AppBar(
           title: const Text('DevIO'),
           actions: [
-            Builder(
-              builder: (context) => ElevatedButton(
-                onPressed: () {
-                  Scaffold.of(context).openEndDrawer();
-                },
-                style: ElevatedButton.styleFrom(shape: const CircleBorder()),
-                child: const CircleAvatar(),
-              ),
-            ),
+            // Builder(
+            //   builder: (context) => ElevatedButton(
+            //     onPressed: () {
+            //       Scaffold.of(context).openEndDrawer();
+            //     },
+            //     style: ElevatedButton.styleFrom(shape: const CircleBorder()),
+            //     child: Image.network(src),
+            //   ),
+            // ),
+
+            StreamBuilder(
+                stream: userInfoStream(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    UserModel model =
+                        UserModel.fromJson(snapshot.data!.data()!);
+                    return ElevatedButton(
+                      onPressed: () {
+                        Scaffold.of(context).openEndDrawer();
+                      },
+                      style:
+                          ElevatedButton.styleFrom(shape: const CircleBorder()),
+                      child: CircleAvatar(
+                        foregroundImage: NetworkImage(model.dpUrl!),
+                        backgroundColor: Colors.purple,
+                        child: Text(model.firstName.characters.first),
+                      ),
+                    );
+                  }
+                  return CircleAvatar(
+                    backgroundColor: Colors.purple,
+                  );
+                })
           ],
         ),
         // Main drawer
@@ -102,7 +133,7 @@ class _DashboardState extends State<Dashboard> {
 }
 
 Widget buildPage(String text) => Center(
-    child: Text(
+        child: Text(
       text,
       style: const TextStyle(fontSize: 28.0),
     ));

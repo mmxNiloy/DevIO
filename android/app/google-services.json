@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "901848470078",
-    "project_id": "devio-45475",
-    "storage_bucket": "devio-45475.appspot.com"
+    "project_number": "509193132806",
+    "project_id": "devio-5710a",
+    "storage_bucket": "devio-5710a.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:901848470078:android:1cf2fbd6abece0cffa376f",
+        "mobilesdk_app_id": "1:509193132806:android:ada3c1790baa14085e9c87",
         "android_client_info": {
           "package_name": "com.example.devio"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDFD43oCmjagsQ9Iq-DNS7uhyjhwmvXQdc"
+          "current_key": "AIzaSyC1xlaHhxqIugmdS98jW-ko6tUdZWN-i0I"
         }
       ],
       "services": {

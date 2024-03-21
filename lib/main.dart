@@ -1,16 +1,15 @@
+import 'package:devio/dashboard/dashboard.dart';
 import 'package:devio/landing_page/landing_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(
-
     options: DefaultFirebaseOptions.currentPlatform,
-
   );
 
   runApp(const MyApp());
@@ -30,7 +29,15 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.dark(),
         useMaterial3: true,
       ),
-      home: const LandingPage(),
+      home: StreamBuilder(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return const Dashboard();
+            }
+
+            return const LandingPage();
+          }),
     );
   }
 }
