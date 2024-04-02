@@ -35,6 +35,7 @@ class _SignupPageState extends State<SignupPage> {
   String _confirmPasswordField = '';
 
   // [Personal info form fields]
+  String? _usernameCheck;
   String _firstName = '';
   String _lastName = '';
   String _gender = Gender.NOTSELECTED;
@@ -97,8 +98,10 @@ class _SignupPageState extends State<SignupPage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               TextFormField(
-                                validator: _validateUsername,
-                                onChanged: (value){
+                                validator: (value) => _usernameCheck,
+                                onChanged: (value) {
+                                  _validateUsername(value);
+                                  _fkBasicInfo.currentState!.validate();
                                   setState(() {
                                     _username = value;
                                   });
@@ -478,28 +481,27 @@ class _SignupPageState extends State<SignupPage> {
     });
   }
 
-  String? _validateUsername(String? value) {
-    if(value == null || value.isEmpty) return "Username is required.";
-    if(value.length < 5) return "Username must have at least 5 characters.";
-
-    String? ret;
-
-    final dbRef = FirebaseFirestore.instance;
-    final collRef = dbRef.collection(UsernamesCollection.collectionName);
-    final docFuture = collRef.doc(value).get();
-    docFuture.then((doc){
-      if(doc.exists) {
-        setState(() {
-          ret = "Username already exists.";
-        });
-      } else {
-        ret = null;
-      }
-    }, onError: (err){
-      debugPrint(err.toString());
-    });
-
-    return ret;
+  void _validateUsername(String? value) {
+    if(value == null || value.isEmpty || value.length < 5) {
+      setState(() {
+        _usernameCheck = 'Username must be at least 5 characters.';
+      });
+    } else {
+      final dbRef = FirebaseFirestore.instance;
+      final collRef = dbRef.collection(UsernamesCollection.collectionName);
+      final docFuture = collRef.doc(value).get();
+      docFuture.then((doc) {
+        if (doc.exists) {
+          setState(() {
+            _usernameCheck = "Username already exists.";
+          });
+        } else {
+          _usernameCheck = null;
+        }
+      }, onError: (err) {
+        debugPrint(err.toString());
+      });
+    }
   }
 
   String? _validateEmail(String? value) {

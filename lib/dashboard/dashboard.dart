@@ -21,7 +21,6 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   int _navbarIndex = 0;
   final PageController _pageController = PageController(initialPage: 0);
-  UserModel? _mUser;
 
   final List<NavigationDestination> _bottomNavItems = [
     const NavigationDestination(
@@ -62,7 +61,26 @@ class _DashboardState extends State<Dashboard> {
                   Scaffold.of(context).openEndDrawer();
                 },
                 style: ElevatedButton.styleFrom(shape: const CircleBorder()),
-                child: const CircleAvatar(),
+                child: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                  future: FirebaseFirestore.instance
+                      .collection(UsersCollection.collectionName)
+                      .doc(FirebaseAuth.instance.currentUser!.uid)
+                      .get(),
+                  builder: (context, snapshot) {
+                    if(snapshot.hasData && snapshot.data!.exists) {
+                      UserModel mUser = UserModel.fromJson(snapshot.data!.data()!);
+                      return CircleAvatar(
+                        backgroundImage: NetworkImage(
+                          mUser.dpUrl!
+                        ),
+                      );
+                    }
+
+                    return const CircleAvatar(
+                      backgroundImage: AssetImage('images/guest_male.png'),
+                    );
+                  },
+                ),
               ),
             ),
           ],
